@@ -5,6 +5,10 @@ https://medium.com/deno-the-complete-reference/a-beginners-guide-to-building-a-s
 
 TODO: How to run on port 80
 https://serverfault.com/questions/112795/how-to-run-a-server-on-port-80-as-a-normal-user-on-linux
+
+See also:
+iptables-persistent
+
 */
 // const PORT = 80;
 

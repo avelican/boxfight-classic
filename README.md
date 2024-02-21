@@ -32,11 +32,13 @@ You will need both Windows and Linux. (Sorry.)
 
 client side
 
-`build`
+`build.bat`
 
-server side
+server side (linux)
 
 `bun index.ts`
+
+( Get Bun here https://github.com/oven-sh/bun )
 
 The server acts both to serve the files, and as a websocket game server.
 

@@ -4,7 +4,7 @@ http://boxfight.xyz
 
 A very simple multiplayer fighting game with [Odin](https://github.com/odin-lang/Odin) and [Raylib](https://github.com/raysan5/raylib)
 
-Special thanks to @Caedo: https://github.com/Caedo/raylib_wasm_odin/
+Special thanks to Caedo: https://github.com/Caedo/raylib_wasm_odin/
 
 ---
 
@@ -52,7 +52,7 @@ Software Automatic Mouth is reverse engnineered from proprietary software, so *t
 
 ( If you start making millions of dollars with SAM, they might take notice ;)
 
---
+---
 
 ## TODO
 

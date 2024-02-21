@@ -1,4 +1,4 @@
-#boxfight.xyz
+# boxfight.xyz
 
 http://boxfight.xyz
 
@@ -8,7 +8,9 @@ Special thanks to @Caedo: https://github.com/Caedo/raylib_wasm_odin/
 
 ---
 
-WARNING: This was written for a [game jam](https://www.youtube.com/watch?v=NbhYi_I5T4A)
+## WARNING
+
+This was written for a game jam: [Low Level Game Dev's 7 day multiplayer game challenge](https://www.youtube.com/watch?v=NbhYi_I5T4A).
 
 Do not expect sanity from anything you find here!
 
@@ -16,7 +18,7 @@ The server does not verify client inputs, so players can exercise their "creativ
 
 ---
 
-Instructions
+## Instructions
 
 You will need both Windows and Linux. (Sorry.)
 
@@ -34,11 +36,17 @@ It just forwards messages. No game logic handled on server except join/quit mess
 
 ---
 
-License: I dedicate this work to the public domain, except for the parts I didn't write.
+## License
+
+I dedicate this work to the public domain, except for the parts I didn't write.
+
+raylib is licensed under zlib https://github.com/raysan5/raylib
 
 jsfxr and its dependency riffwave.js are public domain https://github.com/chr15m/jsfxr
 
-The game client is based on Caedo's repo, which currently has no license. (Awaiting response)
+The game client is based on Caedo's repo, which currently has no license. (Awaiting response) https://github.com/Caedo/raylib_wasm_odin/
+
+Software Automatic Mouth https://github.com/discordier/sam
 
 Software Automatic Mouth is reverse engnineered from proprietary software, so *technically* illegal, but also... the author attempted to contact them and got no response... so... yeah...
 
@@ -46,15 +54,9 @@ Software Automatic Mouth is reverse engnineered from proprietary software, so *t
 
 --
 
-The server is run with Bun: https://github.com/oven-sh/bun/
-
-NOTE: You will need Linux or WSL for the server; Bun does not yet support Windows.
-
-NOTE: The client is built with `build.bat`, a Windows batch file.
+## TODO
 
 TODO: Port build.bat to Linux. Should be quite trivial.
-
----
 
 TODO: Run server on port 80
 

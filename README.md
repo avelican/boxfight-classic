@@ -58,7 +58,7 @@ The game client is based on Caedo's repo, which currently has no license. (Await
 
 Software Automatic Mouth https://github.com/discordier/sam
 
-Software Automatic Mouth is reverse engnineered from proprietary software, so *technically* illegal, but also... the author attempted to contact them and got no response... so... yeah...
+Software Automatic Mouth is reverse engineered from proprietary software, so *technically* illegal, but also... the author attempted to contact them and got no response... so... yeah...
 
 ( If you start making millions of dollars with SAM, they might take notice ;)
 

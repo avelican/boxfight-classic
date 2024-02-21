@@ -18,6 +18,14 @@ The server does not verify client inputs, so players can exercise their "creativ
 
 ---
 
+## NOTE
+
+The game server will randomly assign you a world ( e.g. /123456 ).
+
+You can send this to your friends to play together.
+
+---
+
 ## Instructions
 
 You will need both Windows and Linux. (Sorry.)

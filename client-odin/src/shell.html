@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	
+	<title>raylib web game</title>
+	
+	<meta name="title" content="raylib web game">
+	<meta name="description" content="New raylib web videogame, developed using raylib videogames library">
+	<meta name="keywords" content="raylib, games, html5, programming, C, C++, library, learn, videogames">
+	<meta name="viewport" content="width=device-width">
+	
+	<!-- Open Graph metatags for sharing -->
+	<meta property="og:title" content="raylib web game">
+	<meta property="og:image:type" content="image/png">
+	<meta property="og:image" content="https://www.raylib.com/common/img/raylib_logo.png">
+	<meta property="og:site_name" content="raylib.com">
+	<meta property="og:url" content="https://www.raylib.com/games.html">
+	<meta property="og:description" content="New raylib web videogame, developed using raylib videogames library">
+
+	<!-- Twitter metatags for sharing -->
+	<meta name="twitter:card" content="summary">
+	<meta name="twitter:site" content="@raysan5">
+	<meta name="twitter:title" content="raylib web game">
+	<meta name="twitter:image" content="https://www.raylib.com/common/raylib_logo.png">
+	<meta name="twitter:url" content="https://www.raylib.com/games.html">
+	<meta name="twitter:description" content="New raylib web game, developed using raylib videogames library">
+	
+	<!-- Favicon -->
+	<link rel="shortcut icon" href="https://www.raylib.com/favicon.ico">
+	
+	<style>
+		body { margin: 0px; }
+		canvas.emscripten { border: 0px none; background-color: black; }
+	</style>
+	<script>
+		let websocket;
+
+
+
+
+
+		function connectWebSocket() {
+			const host = window.location.host; // e.g. "localhost:3000"
+			const path = window.location.pathname; // e.g. "/12345"
+			// const path = '';
+			const url = "ws://" + host + path; // note: we use the path for the room
+
+			console.log('websocket connecting to ' + url);
+			// connect
+			websocket = new WebSocket(url);
+
+			// init events
+			websocket.onopen = function () {
+				console.log("WebSocket connection opened");
+			};
+
+			websocket.onmessage = function (event) {
+				if (!event.data.includes('POS')) { // antispam
+					console.log("Received message:", event.data);
+				}
+				handleMessage(event.data);
+			};
+
+			websocket.onclose = function (event) {
+				console.warn(`WebSocket closed with code ${event.code}. Reconnecting in 2 seconds...`);
+				setTimeout(connectWebSocket, 2000);
+			};
+
+			websocket.onerror = function (error) {
+				console.error("WebSocket error:", error);
+				// Handle errors as needed
+			};
+		}
+
+		function sendMessage(msg) {
+			if ( ! websocket.readyState == 1 ) return;
+			if ( ! msg.startsWith('POS')) { // prevent spam
+				console.log('sent message:')
+				console.log(msg)
+				console.log('');
+			}
+			// msg = JSON.stringify(message)
+			websocket.send(msg);
+		}
+
+		function handleMessage(msg) {
+
+			if(msg.startsWith('MSG')) {
+				return handleUserMessage(msg);
+			}
+
+			// server messages
+			const chunks = msg.split(' ');
+			if (chunks.length > 1) {
+				const cmd = chunks[0];
+				switch (cmd) {
+					
+					// NOTE: moved to handleUserMessage
+					// case "POS":
+					// 	_set_player_pos(Number(chunks[1]), Number(chunks[2]));
+					// 	// NOTE: emscripten apparently exports WASM functions, prefixed with underscore 
+					// break;
+
+					case "USERID":
+						_set_player_id(Number(chunks[1]))
+					break;
+
+					case "JOIN":
+						_spawn_player(Number(chunks[1])); // no data but gets synced immediately
+						const join_msg = `Player ${chunks[1]} joined`;
+						sam.speak(join_msg);
+						document.querySelector('#chat_log').value += join_msg + '\n';
+
+						// TODO: maybe keep new player disabled until first sync ?
+					break;
+
+					case "LEAVE":
+						_delete_player(Number(chunks[1]));
+						const leave_msg  = `Player ${chunks[1]} quit`;
+						sam.speak(leave_msg);
+						document.querySelector('#chat_log').value += leave_msg + '\n';
+
+					break;
+				}
+			}
+		}
+
+		function handleUserMessage(msg) {
+			const args = msg.split(' ');
+			if (args.length > 1) {
+				const server_cmd = args.shift(); // MSG
+				const userid = args.shift();
+				const cmd = args.shift();
+				// note: remaining args (if any) now begin at 0
+				switch (cmd) {
+					case "POS":
+						_set_player_pos(Number(userid), Number(args[0]), Number(args[1]));
+					break;
+					case "CHAT":
+						const chat_msg = args.join(' ');
+						const chat_msg_line = `PLAYER ${userid}: ${chat_msg}`
+						document.querySelector('#chat_log').value += chat_msg_line + '\n';
+						sam.speak(chat_msg)
+					break;
+					case "BLT":
+						{
+							const idx = Number(args[0])
+							const x = Number(args[1])
+							const y = Number(args[2])
+							const dx = Number(args[3])
+							const dy = Number(args[4])
+							_net_get_bullet(idx, x, y, dx, dy)
+						}
+					break;
+					case "BLT_X":
+						const idx = Number(args[0])
+						_net_kill_bullet(idx)
+					break
+					case "DIED":
+						const die_msg = `PLAYER ${userid} DIED`;
+						document.querySelector('#chat_log').value += die_msg + '\n';
+						sam.speak(die_msg)
+						_net_player_died(Number(userid))
+						playSound(1) // SFX.ENEMY_DEATH
+					break;	
+
+					case "RSPN":
+						_spawn_player(Number(userid)); // no data but gets synced immediately by next POS msg
+					break;
+				}
+			}
+		}
+
+		function youDied() {
+			window.setTimeout(
+				function(){
+					samDeep.speak('You died')
+				},
+				500 // delay so death sfx ends
+			)
+		}
+
+
+
+
+	</script>
+	<script type='text/javascript' src="https://cdn.jsdelivr.net/gh/eligrey/FileSaver.js/dist/FileSaver.min.js"> </script>
+	<script type='text/javascript' src="samjs.min.js"> </script>
+	<script type='text/javascript' src="riffwave.js"> </script>
+	<script type='text/javascript' src="sfxr.js"> </script>
+	<script type='text/javascript' src="jsfxr_presets.js"> </script>
+	<script>
+		let sam = new SamJs({pitch:200});
+		let samDeep = new SamJs({pitch:142, speed:132});
+
+		function playSound(id) {
+			console.log('id ' + id)
+			const sfx = getSfxById(id); // defined in jsfxr_presets.js
+			sfx.play();
+		}
+
+	</script>
+	<script type='text/javascript'>
+		function saveFileFromMEMFSToDisk(memoryFSname, localFSname)     // This can be called by C/C++ code
+		{
+			var isSafari = false; // Not supported, navigator.userAgent access is being restricted
+			//var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+			var data = FS.readFile(memoryFSname);
+			var blob;
+
+			if (isSafari) blob = new Blob([data.buffer], { type: "application/octet-stream" });
+			else blob = new Blob([data.buffer], { type: "application/octet-binary" });
+
+			// NOTE: SaveAsDialog is a browser setting. For example, in Google Chrome,
+			// in Settings/Advanced/Downloads section you have a setting:
+			// 'Ask where to save each file before downloading' - which you can set true/false.
+			// If you enable this setting it would always ask you and bring the SaveAsDialog
+			saveAs(blob, localFSname);
+		}
+
+	</script>
+	</head>
+	<body>
+		<canvas class=emscripten id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
+		<p id="output" />
+		Chat: <input type="text" id="chat_input" style="width:75%">
+		<textarea id="chat_log" style="font-family: sans-serif;height:400px; width: 80%;border:2px solid gray;"></textarea>
+		<script>
+			var Module = {
+				print: (function() {
+					var element = document.getElementById('output');
+					if (element) element.value = ''; // clear browser cache
+					return function(text) {
+						if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+						console.log(text);
+						if (element) {
+						  element.value += text + "\n";
+						  element.scrollTop = element.scrollHeight; // focus on bottom
+						}
+					};
+				})(),            
+				canvas: (function() {
+					var canvas = document.getElementById('canvas');
+					return canvas;
+				})(),          
+				hello: (function() {
+					console.log('hello called');
+				})(),
+			};
+		</script>
+		<script async type="text/javascript" src="index.js"></script>
+		<script>
+		const chat_log = document.querySelector('#chat_log')
+		const chat_input = document.querySelector('#chat_input');
+			chat_input.addEventListener('keydown', function(e) {
+			console.log(e)
+			const chat_msg = chat_input.value;
+			if (e.key == 'Backspace') {
+				// not sure what broke backspace, but we fix it
+				chat_input.value = chat_msg.substring(0, chat_msg.length-1)
+				// yeah this won't work if you adjust text cursor sorry
+			}
+			if (e.key == 'Enter') {
+				chat_input.value = '';
+				chat_log.value += 'YOU: ' + chat_msg;
+				chat_log.value += '\n';	
+				sendMessage('CHAT ' + chat_msg)
+				sam.speak(chat_msg)
+			}
+		});
+
+		</script>
+	</body>
+</html>

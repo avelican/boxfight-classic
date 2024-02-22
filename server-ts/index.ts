@@ -49,9 +49,12 @@ function get_gzip_headers(file) {
   }
 }
 
+const MAX_PLAYERS = 256;
+
 // let users = {};
 let users = [];
-users.length = 32; // gotta love JS!
+users.length = MAX_PLAYERS; // gotta love JS!
+
 let games = {};
 
 

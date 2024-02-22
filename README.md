@@ -66,7 +66,45 @@ Software Automatic Mouth is reverse engineered from proprietary software, so *te
 
 ## TODO
 
-TODO: Set up a systemd service
+TODO: web audio: sounds get queued and play on first interaction
+
+TODO: prevent "player joined" sound spam on load
+
+TODO: despawn bullets that hit other players ? ( ideally move collision to server, but might take longer )
+
+TODO: limit chat buffer size
+
+TODO: make it so bullet commands only accepted if they apply to the player they came from
+
+TODO: detect, prevent and "discourage" hacking
+
+TODO: autoscroll chat
+
+TODO: filter out zalgo text (people spam it to lag the game)
+
+TODO: make player stand out? white?
+
+TODO: map, walls, line of sight
+
+TODO: variety?
+TODO: ? weapon pickups ?
+
+TODO: do not randomize other player color on respawn
+
+
+TODO: Random spawn pos
+
+TODO: prevent player out of bouns
+
+TODO: camera?
+
+TODO: health bar, regen, healing?
+
+TODO: better integrate chat into game ui
+
+TODO: Feedback on hit other player (currently only when you are hit)
+
+TODO: Make it so chat doesn't move player
 
 TODO: add nginx, http/3 ? I wonder how much difference that makes
 
@@ -84,3 +122,5 @@ But a better protocol should greatly speed up loading, which is currently really
 DONE: Run server on port 80 (see server index.ts for instructions)
 
 DONE: Fix load times. (Try wasm-strip and wasm-opt, then gzip)
+
+DONE: Set up a systemd service

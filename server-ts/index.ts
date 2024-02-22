@@ -68,6 +68,15 @@ let games = {};
 //   return String(num);
 // }
 
+function has_capacity() {
+  for(let i = 0; i < users.length; i++) {
+    if ( ! users[i] ) {
+      return true
+    }
+  }
+  return false;
+}
+
 function make_user_id() {
   // find first empty slot
   // note: previously we did users.length = MAX_PLAYERS
@@ -78,6 +87,7 @@ function make_user_id() {
       return i;
     }
   }
+  return null;
 }
 
 
@@ -122,6 +132,11 @@ const server = Bun.serve({
     // if (path === "/" || path === "/index.html") {
     //   return Response.redirect(new_game_url(), 302);
     // }
+
+
+    if (! has_capacity()) { 
+      return new Response("Sorry, server is full. Please come back later!", { status: 503 });
+    }
 
 
     // user navigates to game url e.g. /1235678

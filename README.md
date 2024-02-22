@@ -2,9 +2,9 @@
 
 http://boxfight.xyz
 
-A very simple multiplayer fighting game with [Odin](https://github.com/odin-lang/Odin) and [Raylib](https://github.com/raysan5/raylib)
+A very simple multiplayer fighting game with [Odin](https://github.com/odin-lang/Odin) and [raylib](https://github.com/raysan5/raylib)
 
-Special thanks to Caedo: https://github.com/Caedo/raylib_wasm_odin/
+Special thanks to Caedo: https://github.com/Caedo/raylib_wasm_odin
 
 ---
 
@@ -66,15 +66,21 @@ Software Automatic Mouth is reverse engineered from proprietary software, so *te
 
 ## TODO
 
-TODO: Port build.bat to Linux. Should be quite trivial.
-
-TODO: Run server on port 80
-
 TODO: Set up a systemd service
+
+TODO: add nginx, http/3 ? I wonder how much difference that makes
+
+TODO: ? Add WebTransport ? I don't think Bun supports it yet and supporting both transport types in a single server might be tricky.
+
+TODO: Fix aiming precision
+
+TODO: Port build.bat to Linux. Should be quite trivial.
 
 TODO: Figure out what Drain means in uWebSockets ... seemed fairly important
 
-TODO: Add WebTransport ? I don't think Bun supports it yet and supporting both transport types in a single server might be tricky.
 
 But a better protocol should greatly speed up loading, which is currently really bad when far from server due to all the back and forth of the handshake and WS upgrade.
 
+DONE: Run server on port 80 (see server index.ts for instructions)
+
+DONE: Fix load times. (Try wasm-strip and wasm-opt, then gzip)

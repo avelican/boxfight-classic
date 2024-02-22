@@ -4,28 +4,16 @@
 	<meta charset="utf-8">
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	
-	<title>raylib web game</title>
+	<title>boxfight</title>
+	<!-- otherwise we have to wait for the emscripten js blob to wake up and decide to begin loading it! -->
+	<link rel="preload" href="index.js" as="script" />
+	<link rel="preload" href="index.wasm" as="fetch" />
+
 	
-	<meta name="title" content="raylib web game">
+	<meta name="title" content="boxfight">
 	<meta name="description" content="New raylib web videogame, developed using raylib videogames library">
 	<meta name="keywords" content="raylib, games, html5, programming, C, C++, library, learn, videogames">
 	<meta name="viewport" content="width=device-width">
-	
-	<!-- Open Graph metatags for sharing -->
-	<meta property="og:title" content="raylib web game">
-	<meta property="og:image:type" content="image/png">
-	<meta property="og:image" content="https://www.raylib.com/common/img/raylib_logo.png">
-	<meta property="og:site_name" content="raylib.com">
-	<meta property="og:url" content="https://www.raylib.com/games.html">
-	<meta property="og:description" content="New raylib web videogame, developed using raylib videogames library">
-
-	<!-- Twitter metatags for sharing -->
-	<meta name="twitter:card" content="summary">
-	<meta name="twitter:site" content="@raysan5">
-	<meta name="twitter:title" content="raylib web game">
-	<meta name="twitter:image" content="https://www.raylib.com/common/raylib_logo.png">
-	<meta name="twitter:url" content="https://www.raylib.com/games.html">
-	<meta name="twitter:description" content="New raylib web game, developed using raylib videogames library">
 	
 	<!-- Favicon -->
 	<link rel="shortcut icon" href="https://www.raylib.com/favicon.ico">
@@ -186,7 +174,6 @@
 
 
 	</script>
-	<script type='text/javascript' src="https://cdn.jsdelivr.net/gh/eligrey/FileSaver.js/dist/FileSaver.min.js"> </script>
 	<script type='text/javascript' src="samjs.min.js"> </script>
 	<script type='text/javascript' src="riffwave.js"> </script>
 	<script type='text/javascript' src="sfxr.js"> </script>
@@ -199,25 +186,6 @@
 			console.log('id ' + id)
 			const sfx = getSfxById(id); // defined in jsfxr_presets.js
 			sfx.play();
-		}
-
-	</script>
-	<script type='text/javascript'>
-		function saveFileFromMEMFSToDisk(memoryFSname, localFSname)     // This can be called by C/C++ code
-		{
-			var isSafari = false; // Not supported, navigator.userAgent access is being restricted
-			//var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-			var data = FS.readFile(memoryFSname);
-			var blob;
-
-			if (isSafari) blob = new Blob([data.buffer], { type: "application/octet-stream" });
-			else blob = new Blob([data.buffer], { type: "application/octet-binary" });
-
-			// NOTE: SaveAsDialog is a browser setting. For example, in Google Chrome,
-			// in Settings/Advanced/Downloads section you have a setting:
-			// 'Ask where to save each file before downloading' - which you can set true/false.
-			// If you enable this setting it would always ask you and bring the SaveAsDialog
-			saveAs(blob, localFSname);
 		}
 
 	</script>

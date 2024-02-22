@@ -193,7 +193,7 @@ _main :: proc "c" () {
 
 	connect_websocket()
 
-	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "untitled game")
+	rl.InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "boxfight")
 
 	rl.SetTargetFPS(60)
 

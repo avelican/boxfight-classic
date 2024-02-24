@@ -1,11 +1,13 @@
 @echo off
 
+REM disabled because for some reason we can't use tsconfig that way.. lame!
+REM call tsc src/game.ts --outfile build/game.js
+call tsc
+
+
 if not exist build mkdir build
 pushd build
 
-REM call tsc ../src/game.ts --outfile game.js
-
-call swc compile ../src/game.ts --out-file game.js
 
 if "%1" == "rel" (
 	rem optimize js
@@ -22,7 +24,6 @@ rem copy ..\src\game.js game.js
 
 copy ..\src\samjs.min.js samjs.min.js
 copy ..\src\riffwave.js riffwave.js
-copy ..\src\jsfxr_presets.js jsfxr_presets.js
 copy ..\src\sfxr.js sfxr.js
 
 if "%1" == "rel" (

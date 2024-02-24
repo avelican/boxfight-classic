@@ -156,7 +156,7 @@ let net_send_interval: i32 = 1 // each frame.. 30 fps was awful!
 let net_send_interval_counter: i32 = 0
 
 
-const DEATH_TIME = 4
+const DEATH_TIME = 4000
 
 let deathTimer : f32 = 0
 

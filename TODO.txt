@@ -1,0 +1,150 @@
+# WIP (priority)
+
+	TODO: volume too loud? mute button? :/
+
+	TODO: build.bat -> build (posix shell) -- ( you currently need Linux/WSL anyway )
+
+	TODO: replace swc with esbuild (swc keeps randomly corrupting output)
+
+	TODO: mobile: virtual joystick
+
+	TODO: rethink network architecture so server is authoritative and checks commands for sanity
+		-- for each command, think of all the ways it can be abused, and how to detect / prevent that.
+	
+	TODO: Feedback when hit other player (currently only when you are hit)
+
+	TODO: CHAT: move chat in-game (eliminate HTML elements)
+
+	TODO: CANVAS: auto-resize
+
+	TODO: CANVAS: scale in CSS?
+
+	TODO: Random spawn pos
+	
+	TODO: make it so you can't go outside the screen
+	
+	TODO: make world bigger
+	
+	MAYBE: add camera
+	
+
+
+# META
+
+
+# BUGS
+
+	TODO: respawn can fail if afk ? (need a better respawn system anyway)
+
+
+
+
+# HACKING
+
+	TODO: update bullet spawn command so it uses relative index not absolute (i.e. 0 .. BULLETS_PER_PLAYER-1)
+		- TODO: make it so bullet commands only accepted if they apply to the player they came from
+
+	TODO: detect, prevent and "discourage" hacking
+	
+	TODO: filter out zalgo text (people spam it to lag the game)
+
+
+
+# SERVER
+
+	TODO: Figure out what Drain means in uWebSockets ... seemed fairly important
+
+	MAYBE: add nginx, http/3 ? I wonder how much difference that makes
+
+	MAYBE: ? Add WebTransport ? I don't think Bun supports it yet and supporting both transport types in a single server might be tricky.
+
+
+
+# MOBILE
+
+	Touch controls ? virtual joy
+
+	fix chat on mobile
+
+
+
+# GAMEPLAY
+
+	Random spawn pos
+
+	despawn bullets that hit other players ? ( ideally move collision to server, but might take longer )
+
+	prevent player out of bouns
+
+	health bar, regen, healing?
+
+	DONE: Fix aiming precision
+
+
+# FEATURES
+
+	right click shotgun?
+
+
+# UX / UI 
+
+	AUDIO: TOO LOUD: web audio: sounds get queued and play on first interaction
+
+	AUDIO: TOO LOUD: prevent "player joined" sound spam on load
+
+	
+
+	TODO: CHAT: make chat scroll backwards
+		- obsoletes: TODO: autoscroll chat
+
+	CHAT: make chat appear over players
+
+	CHAT: limit chat buffer size
+
+
+	DONE: preventddefault arrowkeys
+
+	TODO: better to just remove scrollbar instead ?
+
+	TODO: preventdefault canvas click (but this breaks defocusing chat input...)
+
+	TODO: "I can't even tell what my player number is" (add a "YOU JOINED (Player 02)" ?)
+
+
+
+# MISC
+
+	TODO: favicon
+
+	TODO: ghost players? (scrapers?)
+
+
+	TODO: make player stand out? white?
+
+	TODO: map, walls, line of sight
+
+	TODO: variety?
+		- TODO: ? weapon pickups ?
+
+	TODO: do not randomize other player color on respawn
+
+	TODO: better integrate chat into game ui
+
+
+
+	DONE: Make it so chat doesn't move player
+
+
+
+
+
+
+	MAYBE: a better protocol could greatly speed up loading
+
+
+	DONE: Run server on port 80 (see server index.ts for instructions)
+
+	DONE: Fix load times. (Try wasm-strip and wasm-opt, then gzip) // Note: WASM now unused
+
+	DONE: Set up a systemd service
+

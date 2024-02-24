@@ -95,8 +95,21 @@ window.addEventListener("mousemove", function(event){
 window.addEventListener("contextmenu", function(event){ event.preventDefault(); return false;})
 
 window.addEventListener("mousedown", function(event){ 
+	// console.log('wtf')
 	Mouse.pressed[event.button] = true;
 	Mouse.down[event.button] = true;
+	// alert('yo')
+	// event.preventDefault();
+});
+
+canvas.addEventListener("mousedown", function(event){ 
+	
+	// event.preventDefault(); // prevent clicks from selecting text
+	// NOTE: this might prevent scroll on mobile? (do we WANT scroll?)
+	// EDIT: this makes it so you can't leave the text box...
+	
+	// window.getSelection()!.removeAllRanges();
+	// doesn't work
 });
 
 window.addEventListener("mouseup",   function(event){ 
@@ -115,12 +128,22 @@ const Keyboard =
 };
 
 window.addEventListener("keydown", function(event){
+
+	// do not move player while chatting
+	if (document.activeElement === chat_input) return;
+
+
 	// TODO: we can also use event.code 
 	// for more precise info,
 	// such as which AltLeft instead of Alt... but yea
 	Keyboard.down[event.key] = true;
 	Keyboard.pressed[event.key] = true;
 	// Game.keydown(event.key); // legacy
+
+	if (event.key == "ArrowUp" || event.key == "ArrowDown") {
+		event.preventDefault(); // people complained about scroll up down
+		// TODO: perhaps a better fix would be to remove the scrollbar altogether
+	}
 });
 
 window.addEventListener("keyup", function(event){
@@ -1090,7 +1113,7 @@ function update_player() : void {
 	if(IsKeyDown("a") || IsKeyDown("ArrowLeft") ) {
 		player.x -= PLAYER_MOVE_SPEED
 	}
-	if(IsKeyDown("d") || IsKeyDown("Arrowright") ) {
+	if(IsKeyDown("d") || IsKeyDown("ArrowRight") ) {
 		player.x += PLAYER_MOVE_SPEED
 	}
 

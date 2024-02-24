@@ -1,0 +1,7 @@
+remove number type casts?
+	or translate them to (useless) TS casts, for explicitness?
+
+i have two build scripts, one for dev and one for release
+How do I load game.js in dev and game.min.js in ship?
+I don't wanna have 2 index.html files, nor generate them dynamically :/
+I think the least bad option is to use the same filename, so leave out the min...

@@ -1,0 +1,1 @@
+swc compile --watch ./src/game.ts --out-file ./build/game.js

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	
+	<title>boxfight</title>
+	<!-- <link rel="preload" href="game.js" as="script" /> -->
+	<!-- <link rel="preload" href="index.wasm" as="fetch" /> -->
+
+
+	<!-- todo -->
+<!-- 
+	<meta name="title" content="boxfight">
+	<meta name="description" content="todo">
+	<meta name="keywords" content="todo"> 
+-->
+	
+	<!-- todo is this right ? -->
+	<meta name="viewport" content="width=device-width">
+
+	
+	<!-- Favicon -->
+	<!-- todo -->
+	<!-- <link rel="shortcut icon" href="https://www.raylib.com/favicon.ico"> -->
+	
+	<style>
+		body { margin: 0px; }
+		canvas { border: 0px none; background-color: black; }
+	</style>
+	<script type='text/javascript' src="samjs.min.js"> </script>
+	<script type='text/javascript' src="riffwave.js"> </script>
+	<script type='text/javascript' src="sfxr.js"> </script>
+	<script type='text/javascript' src="jsfxr_presets.js"> </script>
+	</head>
+	<body>
+		<canvas width=800 height=600 id=gameCanvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
+		<p id="output" />
+		Chat: <input type="text" id="chat_input" style="width:75%">
+		<textarea id="chat_log" style="font-family: sans-serif;height:400px; width: 80%;border:2px solid gray;"></textarea>
+
+		<script type="text/javascript" src="game.js"></script>
+		<script>
+
+		// const chat_log = document.querySelector('#chat_log')
+		const chat_input = document.querySelector('#chat_input');
+			chat_input.addEventListener('keydown', function(e) {
+			console.log(e)
+			const chat_msg = chat_input.value;
+
+			// TODO: check if this this is fixed in the port.
+			// if (e.key == 'Backspace') {
+			// 	// not sure what broke backspace, but we fix it
+			// 	chat_input.value = chat_msg.substring(0, chat_msg.length-1)
+			// 	// yeah this won't work if you adjust text cursor sorry
+			// }
+			// TODO: add a submit key for phones
+			if (e.key == 'Enter') {
+				chat_input.value = '';
+				chat_log.value += 'YOU: ' + chat_msg;
+				chat_log.value += '\n';	
+				sendMessage('CHAT ' + chat_msg)
+				sam.speak(chat_msg)
+			}
+		});
+
+		</script>
+	</body>
+</html>

@@ -22,7 +22,9 @@ WARNING: you must open port 80 in AWS
 
 const PORT = 3000;
 // const BASE_PATH = "../client";
-const BASE_PATH = "../client-odin/build";
+// const BASE_PATH = "../client-odin/build";
+const BASE_PATH = "../client-ts/build";
+
 
 let game_url_regex = new RegExp("/\\d+"); // "/123" etc
 

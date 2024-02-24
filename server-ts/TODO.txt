@@ -1,0 +1,3 @@
+guarantee that player index is in valid range for respawn command
+ensure that player bullet commands are in valid range
+TODO: modify player bullet commands (also on client) so indexing is relative

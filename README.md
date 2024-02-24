@@ -54,7 +54,7 @@ raylib is licensed under zlib https://github.com/raysan5/raylib
 
 jsfxr and its dependency riffwave.js are public domain https://github.com/chr15m/jsfxr
 
-The game client is based on Caedo's repo, which currently has no license. (Awaiting response) https://github.com/Caedo/raylib_wasm_odin/
+The game client is based on Caedo's repo (public domain) https://github.com/Caedo/raylib_wasm_odin/
 
 Software Automatic Mouth https://github.com/discordier/sam
 
@@ -65,6 +65,30 @@ Software Automatic Mouth is reverse engineered from proprietary software, so *te
 ---
 
 ## TODO
+
+TODO: right click shotgun?
+
+TODO: update bullet spawn command so it uses relative index not absolute (i.e. 0 .. BULLETS_PER_PLAYER-1)
+
+TODO: make chat scroll backwards
+
+TODO: make chat appear over players
+
+TODO: respawn can fail if afk
+
+TODO: preventddefault arrowkeys
+
+TODO: preventdefault canvas click
+
+TODO: ghost players? (scrapers?)
+
+TODO: "I can't even tell what my player number is"
+
+TODO: Touch controls
+
+TODO: fix chat on mobile
+
+TODO: favicon
 
 TODO: web audio: sounds get queued and play on first interaction
 

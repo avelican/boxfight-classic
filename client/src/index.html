@@ -42,27 +42,6 @@
 		<script type="text/javascript" src="game.js"></script>
 		<script>
 
-		// const chat_log = document.querySelector('#chat_log')
-		const chat_input = document.querySelector('#chat_input');
-			chat_input.addEventListener('keydown', function(e) {
-			console.log(e)
-			const chat_msg = chat_input.value;
-
-			// TODO: check if this this is fixed in the port.
-			// if (e.key == 'Backspace') {
-			// 	// not sure what broke backspace, but we fix it
-			// 	chat_input.value = chat_msg.substring(0, chat_msg.length-1)
-			// 	// yeah this won't work if you adjust text cursor sorry
-			// }
-			// TODO: add a submit key for phones
-			if (e.key == 'Enter') {
-				chat_input.value = '';
-				chat_log.value += 'YOU: ' + chat_msg;
-				chat_log.value += '\n';	
-				sendMessage('CHAT ' + chat_msg)
-				sam.speak(chat_msg)
-			}
-		});
 
 		</script>
 	</body>

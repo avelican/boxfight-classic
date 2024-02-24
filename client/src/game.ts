@@ -249,7 +249,10 @@ function renderText(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) {
 	// console.log('renderText');
 	// console.log(text);
 
-	{ // word-wrap
+	let word_wrap = false;
+	let char_wrap = false; // near bottom of function
+
+	if (word_wrap) { // word-wrap
 		let _text = text.split(''); // workaround for frigging javascript
 		let cur_line_width = 0;
 		let lastSpaceIndex = -1;
@@ -274,7 +277,7 @@ function renderText(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) {
 		const letter = text[i];
 		// console.log(letter);
 		if (letter == '\n') {
-			console.log('NEWLINE DETECTED. Reset target_x; increment target_y');
+			// console.log('NEWLINE DETECTED. Reset target_x; increment target_y');
 			target_x = TARGET_START_X;
 			target_y += LINE_HEIGHT * scale;
 			continue;
@@ -300,7 +303,7 @@ function renderText(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) {
 
 		// this should rarely run, since word-wrap above handles most cases.
 		// this runs if there was a word with no spaces, longer than the screen
-		if (target_x >= TARGET_END_X) {
+		if (char_wrap && target_x >= TARGET_END_X) {
 			target_x = TARGET_START_X;
 			target_y += LINE_HEIGHT * scale;
 		}
@@ -703,6 +706,35 @@ function chat_log(msg: str) : void{
 	// prepend
 	log_el.value = msg + '\n' + log_el.value
 }
+
+
+
+
+// const chat_log = document.querySelector('#chat_log')
+const chat_input = document.querySelector('#chat_input') as HTMLInputElement;
+chat_input.addEventListener('keydown', function(e) {
+	console.log(e)
+	const chat_msg = chat_input.value;
+
+	// TODO: check if this this is fixed in the port.
+	// if (e.key == 'Backspace') {
+	// 	// not sure what broke backspace, but we fix it
+	// 	chat_input.value = chat_msg.substring(0, chat_msg.length-1)
+	// 	// yeah this won't work if you adjust text cursor sorry
+	// }
+	// TODO: add a submit key for phones
+	if (e.key == 'Enter') {
+		const chat_log = document.querySelector('#chat_log') as HTMLTextAreaElement;
+		chat_input.value = '';
+		chat_log.value += 'YOU: ' + chat_msg;
+		chat_log.value += '\n';	
+		sendMessage('CHAT ' + chat_msg)
+		sam.speak(chat_msg)
+	}
+});
+
+
+
 
 
 

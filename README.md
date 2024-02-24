@@ -20,9 +20,11 @@ The server does not verify client inputs, so players can exercise their "creativ
 
 ## NOTE
 
-The game server will randomly assign you a world ( e.g. /123456 ).
+~~The game server will randomly assign you a world ( e.g. /123456 ).~~
 
-You can send this to your friends to play together.
+~~You can send this to your friends to play together.~~
+
+Edit: Room feature is currently disabled. (Need to add users array per room)
 
 ---
 

@@ -1,3 +1,5 @@
+// "quality" of life
+// swear to god I need to make a compiler...
 type bool = boolean;
 type str = string;
 type num = number;
@@ -53,8 +55,8 @@ function InitArrayWithSize(array: any[], size: i32, constructor: Function) {
 
 let canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 // let context = canvas.getContext("2d", { alpha: true });
-let context = canvas.getContext("2d", { alpha: false }) as CanvasRenderingContext2D;
-
+let context = canvas.getContext("2d", { alpha: false, imageSmoothingEnabled: false }) as CanvasRenderingContext2D;
+context.imageSmoothingEnabled = false;
 const MOUSE_LEFT = 0;
 const MOUSE_MIDDLE = 1;
 const MOUSE_RIGHT = 2;
@@ -130,6 +132,185 @@ window.addEventListener("keyup", function(event){
 function IsKeyDown(key: str) : bool {
 	return !!Keyboard.down[key]; // note: !! converts undefined to false
 }
+
+
+
+//////////////
+// text rendering
+// todo encapsulate so we can have multiple fonts?
+
+const font = document.querySelector('#number_font') as HTMLImageElement;
+console.log('font:')
+console.log(font)
+
+// const canvas = document.querySelector('canvas');
+// const context = canvas.getContext("2d");
+
+const FONT_BITMAP_WIDTH = 80;
+const FONT_BITMAP_HEIGHT = 48;
+const CHARS_PER_FONT_ROW = 16;
+const CHARS_PER_FONT_COL = 6;
+const CHAR_COUNT = CHARS_PER_FONT_ROW * CHARS_PER_FONT_COL;
+const CHAR_WIDTH = FONT_BITMAP_WIDTH / CHARS_PER_FONT_ROW;
+const CHAR_HEIGHT = FONT_BITMAP_HEIGHT / CHARS_PER_FONT_COL;
+
+// Disabled because inappropriate for an API that takes a position
+// const TARGET_START_X = CHAR_WIDTH; // 
+// const TARGET_END_X = canvas.width - CHAR_WIDTH;
+// const TARGET_START_Y = CHAR_HEIGHT;
+// const MAX_LINE_WIDTH = TARGET_END_X - TARGET_START_X;
+// const CHARS_PER_SCREEN_LINE = MAX_LINE_WIDTH / CHAR_WIDTH;
+
+const LINE_HEIGHT = CHAR_HEIGHT * 1.5;
+
+function calcTextScale(size: i32) : i32 {
+	return Math.floor(size/CHAR_HEIGHT);
+	// should it be round instead?
+}
+
+let fontReady = false;
+
+let char_widths : number[] = [];
+let char_startx : number[] = [];
+function initFont() {
+	console.log('initFont');
+	// detects char widths
+
+	// // px
+	// let x = 0;
+	// let y = 0;
+
+	// mashallah it will be erased
+	context.drawImage(font, 0, 0);
+
+	// iterate over each character
+	for (let i = 0; i < CHAR_COUNT; i++) {
+		const x_index = i % CHARS_PER_FONT_ROW;
+		const y_index = Math.floor(i / CHARS_PER_FONT_ROW);
+
+		let x_start = -1;
+		let x_end = -1;
+		// iterate over each pixel in the character
+		for (let x = x_index*CHAR_WIDTH; x<(x_index+1)*CHAR_WIDTH; x++) {
+			for (let y = y_index*CHAR_HEIGHT; y<(y_index+1)*CHAR_HEIGHT; y++) {
+				// const letter = String.fromCharCode(i + 32);
+				// console.log(letter);
+				const pixel = context.getImageData(x, y, 1, 1).data;
+				if(pixel[3]! > 0) { // check alpha
+					if (x_start == -1) {
+						x_start = x;
+					}
+					x_end = x; // gets constantly updated until the last time we see an opaque pixel
+				}
+			}	
+		}
+		let width = x_end - x_start;
+		width += 1; // 1px wide chars have same start and end index, which would give 0
+		if(x_start == -1) {
+			// empty character
+			x_start = x_index * CHAR_WIDTH; // reset start_x
+			width = CHAR_WIDTH / 2; // NOTE: adjust space char width here
+		}
+		char_startx[i] = x_start;
+		char_widths[i] = width;
+		// console.log(char_startx[i], char_widths[i]);
+	}
+	context.clearRect(0,0,canvas.width,canvas.height);
+
+	fontReady = true;
+}
+
+function renderTextCaps(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) {
+	if (!fontReady) return
+	text = text.toUpperCase();
+	renderText(x,y, text, alpha, scale);
+}
+
+function renderText(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) {
+	if (!fontReady) return
+
+	if (typeof alpha == 'undefined') {
+		alpha = 1.0;
+	}
+
+	const alpha_saved = context.globalAlpha;
+	context.globalAlpha = alpha
+
+	if (typeof scale == 'undefined') {
+		scale = 1;
+	}
+
+	const TARGET_START_X = x
+	const TARGET_START_Y = y
+
+	// TODO add with param
+	const TARGET_END_X = canvas.width - (CHAR_WIDTH*scale) * 2
+
+	// console.log('renderText');
+	// console.log(text);
+
+	{ // word-wrap
+		let _text = text.split(''); // workaround for frigging javascript
+		let cur_line_width = 0;
+		let lastSpaceIndex = -1;
+		for (let i = 0; i < text.length; i++) {
+			if (text[i] == ' ')
+				lastSpaceIndex = i;
+			const ascii = text.charCodeAt(i);
+			const sprite_index = ascii - 32;
+			cur_line_width += char_widths[sprite_index]! * scale;
+			if (cur_line_width >= TARGET_END_X) { // TODO: ? should this be >= or >
+				cur_line_width = 0;
+				_text[lastSpaceIndex] = '\n'; // workaround
+			}
+		}
+		text = _text.join(''); // end workaround
+	}
+
+	let cur_line_width = 0;
+	let target_x = TARGET_START_X;
+	let target_y = TARGET_START_Y;
+	for (let i = 0; i < text.length; i++) {
+		const letter = text[i];
+		// console.log(letter);
+		if (letter == '\n') {
+			console.log('NEWLINE DETECTED. Reset target_x; increment target_y');
+			target_x = TARGET_START_X;
+			target_y += LINE_HEIGHT * scale;
+			continue;
+		}
+		const ascii = text.charCodeAt(i);
+		const sprite_index = ascii - 32;
+		// console.log(letter, ascii, sprite_index);
+		// note: this could be optimized, modulo is expensive
+		// but we probably won't have much text
+		// const x_index = sprite_index % CHARS_PER_FONT_ROW;
+		const y_index = Math.floor(sprite_index / CHARS_PER_FONT_ROW);
+		// console.log(x_index, y_index)
+
+		// const x_coord = x_index * CHAR_WIDTH;
+		let y_coord = y_index * CHAR_HEIGHT;
+		const width  = char_widths[sprite_index]!; // TODO: separate variable for source vs target width?
+		const startx = char_startx[sprite_index]!;
+		context.drawImage(font, startx, y_coord, width, CHAR_HEIGHT, target_x, target_y, width * scale, CHAR_HEIGHT * scale);
+		target_x += width * scale;
+		target_x += 1 * scale; // padding! // TODO configurable padding. e.g. want a 2px padding (at source pixel level)
+		// target_y += 20; // debug
+		cur_line_width += width * scale;
+
+		// this should rarely run, since word-wrap above handles most cases.
+		// this runs if there was a word with no spaces, longer than the screen
+		if (target_x >= TARGET_END_X) {
+			target_x = TARGET_START_X;
+			target_y += LINE_HEIGHT * scale;
+		}
+	}
+
+	context.globalAlpha = alpha_saved
+}
+
+
+//////////////
 
 function GetTimeMs() {
 	return Date.now()
@@ -237,13 +418,13 @@ function DrawRectangleArgs(x: i32, y: i32, w: i32, h: i32, color: Color) : void 
 	context.fillRect(x,y,w,h);
 }
 
-function DrawText(text: str, x: i32, y: i32, textSize: i32, color: Color) : void {
-	// TODO implement my own text renderer
-	// context.font = `${textSize}px sans-serif`
-	SetFillStyle(color)
-	context.font = `${textSize}px monospace`
-	context.fillText(text, x, y);
-}
+// function DrawText(text: str, x: i32, y: i32, textSize: i32, color: Color) : void {
+// 	// TODO implement my own text renderer
+// 	// context.font = `${textSize}px sans-serif`
+// 	SetFillStyle(color)
+// 	context.font = `${textSize}px monospace`
+// 	context.fillText(text, x, y);
+// }
 
 ///////////////////////////
 
@@ -527,7 +708,8 @@ function chat_log(msg: str) : void{
 
 let websocket : WebSocket;
 
-
+const PRINT_MSG_IN = false;
+const PRINT_MSG_OUT = false;
 
 
 
@@ -547,8 +729,10 @@ function connectWebSocket() {
 	};
 
 	websocket.onmessage = function (event) {
-		if (!event.data.includes('POS')) { // antispam
-			console.log("Received message:", event.data);
+		if (PRINT_MSG_IN) {
+			if (!event.data.includes('POS')) { // antispam
+				console.log("Received message:", event.data);
+			}
 		}
 		handleMessage(event.data);
 	};
@@ -566,10 +750,12 @@ function connectWebSocket() {
 
 function sendMessage(msg: str) {
 	if ( ! (websocket.readyState == 1) ) return;
-	if ( ! msg.startsWith('POS')) { // prevent spam
-		console.log('sent message:')
-		console.log(msg)
-		console.log('');
+	if (PRINT_MSG_OUT) {
+		if ( ! msg.startsWith('POS')) { // prevent spam
+			console.log('sent message:')
+			console.log(msg)
+			console.log('');
+		}
 	}
 	// msg = JSON.stringify(message)
 	websocket.send(msg);
@@ -763,6 +949,8 @@ const BULLET_PRECISION_FACTOR = 100 // lets us use int instead of float
 // TODO rename to init
 function _main() : void {
 
+	initFont()
+
 	// init_dummy_players()
 	reset_player()
 
@@ -941,7 +1129,8 @@ function draw_player(p: Player, id: i32) : void {
 	} else {
 		DrawRectangleArgs(p.x, p.y, PLAYER_WIDTH, PLAYER_HEIGHT, Color(255,0,0,128))
 	}
-	let textSize : i32 = 32
+	let textSize : i32 = 24
+	let textScale = calcTextScale(textSize);
 	// let text: string = `${id}`
 	let text : string;
 	if ( id == -1) {
@@ -950,8 +1139,10 @@ function draw_player(p: Player, id: i32) : void {
 		text = String(id).padStart(2, '0');
 	}
 	
-	DrawText(text, p.x, p.y - 32, textSize, Color(255,255,255,64))
-
+	// DrawText(text, p.x, p.y - 32, textSize, Color(255,255,255,64))
+	// todo color
+	// todo size??? All we can do is integer scale everything...
+	renderText(p.x + 2, p.y - 32, text, 0.3, textScale);
 }
 
 function update_bullets() : void {
@@ -997,14 +1188,17 @@ function update(time: num) : void {
 	updateCounter++;
 	// _time = GetTimeMs()
 	_frame_time = time - _time_prev;
-	secondTimer += _frame_time
-	if(secondTimer >= 1000) {
-		secondTimer = 0;
-		console.log('one second passed')
-		console.log('Updates in past second: ' + updateCounter);
-		updateCounter = 0;
-	}
 	// note: at bottom we do _frame_time_prev = _frame_time;
+	
+	
+	// secondTimer += _frame_time
+	// if(secondTimer >= 1000) {
+	// 	secondTimer = 0;
+	// 	console.log('one second passed')
+	// 	console.log('Updates in past second: ' + updateCounter);
+	// 	updateCounter = 0;
+	// }
+	
 
 	shootTimer -= _frame_time
 	if(shootTimer < 0) {
@@ -1063,7 +1257,8 @@ function update(time: num) : void {
 	// // context.fillStyle = '#fff8'
 	// context.fillText('hello', 32, 32);
 
-	DrawText('hello', 32, 32, 16, Color(255,255,255,32))
+	// DrawText('hello', 32, 32, 16, Color(255,255,255,32))
+	// renderText(200, 200, "hello", 0.5, 4) // note: current font only has numbers
 
 	// reset inputs
 	Mouse.moved = false;

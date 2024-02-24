@@ -2,9 +2,9 @@
 
 http://boxfight.xyz
 
-A very simple multiplayer fighting game with [Odin](https://github.com/odin-lang/Odin) and [raylib](https://github.com/raysan5/raylib)
+A simple multiplayer fighting game.
 
-Special thanks to Caedo: https://github.com/Caedo/raylib_wasm_odin
+Original game jam version with [Odin](https://github.com/odin-lang/Odin) and [raylib](https://github.com/raysan5/raylib) can be found here: https://github.com/avelican/boxfight-raylib-odin
 
 ---
 

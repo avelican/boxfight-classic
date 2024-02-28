@@ -1,43 +1,64 @@
 # WIP (priority)
 
-	TODO: volume too loud? mute button? :/
+	TODO: !!! frame rate independent !!!
 
-	TODO: build.bat -> build (posix shell) -- ( you currently need Linux/WSL anyway )
-
-	TODO: replace swc with esbuild (swc keeps randomly corrupting output)
-
-	TODO: mobile: virtual joystick
 
 	TODO: rethink network architecture so server is authoritative and checks commands for sanity
 		-- for each command, think of all the ways it can be abused, and how to detect / prevent that.
 	
+
+	TODO: Random spawn pos
+
+	TODO: reset keyboard / mouse state when page gets / loses focus
+
+	TODO: some players shoot bullets before bullets gone (overwrites bullets)
+			A 144Hz player had this, so it might have to do with that. Not sure.
+
+	TODO: mobile: virtual joystick
+
+	TODO: make world bigger
+		NEEDS: add camera
+
+	TODO: cache font (glyph widths)
+
+	TODO: volume too loud? mute button? :/
+		TODO: Modify Software Automatic Mouth to add a gain node.
+		https://github.com/discordier/sam/blob/master/dist/samjs.js#L69
+		TODO: Modify jsfxr to add a gain node 
+		https://github.com/chr15m/jsfxr/blob/master/sfxr.js#L831
+
+	TODO: build.bat -> build (posix shell) -- ( you currently need Linux/WSL anyway )
+
+	TODO: replace swc with esbuild? (swc keeps randomly corrupting output)
+		edit: I'm an idiot, I had multiple swc watch instances running simultaneously
+
 	TODO: Feedback when hit other player (currently only when you are hit)
 
 	TODO: CHAT: move chat in-game (eliminate HTML elements)
 
-	TODO: CANVAS: auto-resize
 
-	TODO: CANVAS: scale in CSS?
 
-	TODO: Random spawn pos
-	
-	TODO: make it so you can't go outside the screen
-	
-	TODO: make world bigger
-	
-	MAYBE: add camera
+	DONE: CANVAS: auto-resize
+	DONE: CANVAS: scale in CSS?
+	DONE: make it so you can't go outside the screen
+
 	
 
 
 # META
 
 
+	How to update game while people are playing?
+	Game client should refresh when websocket disconnects.
+	Or rather... when websocket *reconnects*. (server back online)
+	Meanwhile display "loading new version..." message
+
 # BUGS
 
 	TODO: respawn can fail if afk ? (need a better respawn system anyway)
 
 
-
+	TODO: bullets spawn distance is slightly off depending on shot angle
 
 # HACKING
 

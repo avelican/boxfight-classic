@@ -42,6 +42,94 @@ function Vector2Normalize(vector: Vector2) : Vector2 {
 function Vector2TimesScalar(v: Vector2, s: f32) : Vector2 {
 	return {x: v.x * s, y: v.y * s}
 }
+///////////////////
+
+const abs = Math.abs;
+
+
+function sfc32(a: num, b: num, c: num, d: num) {
+// https://stackoverflow.com/a/47593316/11251568
+	return function() {
+		a |= 0; b |= 0; c |= 0; d |= 0; 
+		var t = (a + b | 0) + d | 0;
+		d = d + 1 | 0;
+		a = b ^ b >>> 9;
+		b = c + (c << 3) | 0;
+		c = (c << 21 | c >>> 11);
+		c = c + t | 0;
+		return (t >>> 0);
+	}
+}
+
+
+function sfc32f(a: num, b: num, c: num, d: num) {
+// https://stackoverflow.com/a/47593316/11251568
+	return function() {
+		a |= 0; b |= 0; c |= 0; d |= 0; 
+		var t = (a + b | 0) + d | 0;
+		d = d + 1 | 0;
+		a = b ^ b >>> 9;
+		b = c + (c << 3) | 0;
+		c = (c << 21 | c >>> 11);
+		c = c + t | 0;
+		return (t >>> 0) / 4294967296;
+	}
+}
+
+// https://stackoverflow.com/a/47593316/11251568
+var seed = 1337 ^ 0xDEADBEEF; // 32-bit seed with optional XOR value
+// Pad seed with Phi, Pi and E.
+// https://en.wikipedia.org/wiki/Nothing-up-my-sleeve_number
+
+
+function make_rand() {
+	return sfc32(0x9E3779B9, 0x243F6A88, 0xB7E15162, seed);
+}
+
+function make_randf() {
+	return sfc32f(0x9E3779B9, 0x243F6A88, 0xB7E15162, seed);
+}
+
+
+
+const rand = make_rand()
+
+const randf = make_randf()
+
+// "constant" random functions are reset every frame
+// we use them for things like terrain noise
+let rand_const = make_rand()
+let randf_const = make_randf()
+
+
+function reset_constant_rand() {
+	rand_const = make_rand()
+	randf_const = make_randf()
+}
+
+// // works but unused
+// function random () {
+// 	// range 0-100.000 (3 decimal places)
+// 	let r = rand();
+// 	r = abs(r);
+// 	r ^= r >> 13;
+// 	r %= 100000;
+// 	r /= 1000;
+// 	return r;
+// }
+
+function rand_range (min: i32, max: i32) {
+	let range = max-min+1;
+	let r = rand();
+	return abs(r) % range + min;
+}
+
+function rand_range_const (min: i32, max: i32) {
+	let range = max-min+1;
+	let r = rand_const();
+	return abs(r) % range + min;
+}
+
 
 ///////////////////
 function InitArrayWithSize(array: any[], size: i32, constructor: Function) {
@@ -55,7 +143,9 @@ function InitArrayWithSize(array: any[], size: i32, constructor: Function) {
 
 let canvas = document.getElementById("gameCanvas") as HTMLCanvasElement;
 // let context = canvas.getContext("2d", { alpha: true });
-let context = canvas.getContext("2d", { alpha: false, imageSmoothingEnabled: false }) as CanvasRenderingContext2D;
+// let context = canvas.getContext("2d", { alpha: false }) as CanvasRenderingContext2D;
+let context = canvas.getContext("2d", { alpha: false }) as CanvasRenderingContext2D;
+
 context.imageSmoothingEnabled = false;
 const MOUSE_LEFT = 0;
 const MOUSE_MIDDLE = 1;
@@ -84,15 +174,15 @@ window.addEventListener("mousemove", function(event){
 	let x = event.clientX - canvas.offsetLeft;
 	let y = event.clientY - canvas.offsetTop;
 	
-	// x /= SCALE; // TODO
-	// y /= SCALE;
+	x /= SCALE;
+	y /= SCALE;
 
 	Mouse.x = x;
 	Mouse.y = y;
 });
 
 // prevent right click menu
-window.addEventListener("contextmenu", function(event){ event.preventDefault(); return false;})
+canvas.addEventListener("contextmenu", function(event){ event.preventDefault(); return false;})
 
 window.addEventListener("mousedown", function(event){ 
 	// console.log('wtf')
@@ -102,7 +192,7 @@ window.addEventListener("mousedown", function(event){
 	// event.preventDefault();
 });
 
-canvas.addEventListener("mousedown", function(event){ 
+canvas.addEventListener("mousedown", function(_event){ 
 	
 	// event.preventDefault(); // prevent clicks from selecting text
 	// NOTE: this might prevent scroll on mobile? (do we WANT scroll?)
@@ -128,6 +218,9 @@ const Keyboard =
 };
 
 window.addEventListener("keydown", function(event){
+	
+	console.log(event.key)
+	console.log(event.code)
 
 	// do not move player while chatting
 	if (document.activeElement === chat_input) return;
@@ -138,7 +231,11 @@ window.addEventListener("keydown", function(event){
 	// such as which AltLeft instead of Alt... but yea
 	Keyboard.down[event.key] = true;
 	Keyboard.pressed[event.key] = true;
-	// Game.keydown(event.key); // legacy
+	// yeah... turns out they both suck in different ways. So we just use both
+	Keyboard.down[event.code] = true;
+	Keyboard.pressed[event.code] = true;
+
+	
 
 	if (event.key == "ArrowUp" || event.key == "ArrowDown") {
 		event.preventDefault(); // people complained about scroll up down
@@ -148,6 +245,8 @@ window.addEventListener("keydown", function(event){
 
 window.addEventListener("keyup", function(event){
 	Keyboard.down[event.key] = false;
+	Keyboard.down[event.code] = false;
+	
 });
 
 
@@ -247,6 +346,23 @@ function renderTextCaps(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) {
 	if (!fontReady) return
 	text = text.toUpperCase();
 	renderText(x,y, text, alpha, scale);
+}
+
+function renderTextInvert(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) : void {
+	context.globalCompositeOperation = "difference" 
+	// context.globalCompositeOperation = "xor" 
+	
+	renderText(x,y, text, alpha, scale);
+	context.globalCompositeOperation = "source-over" // default
+}
+
+
+function renderTextBlack(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) : void {
+	// context.globalCompositeOperation = "difference" 
+	context.globalCompositeOperation = "xor" 
+	
+	renderText(x,y, text, alpha, scale);
+	context.globalCompositeOperation = "source-over" // default
 }
 
 function renderText(x: i32, y: i32, text: str, alpha?: f32, scale?: i32) {
@@ -367,11 +483,28 @@ const DEATH_TIME = 4000
 
 let deathTimer : f32 = 0
 
-const PLAYER_WIDTH = 32
-const PLAYER_HEIGHT = 32
+// const PLAYER_WIDTH = 32
+// const PLAYER_HEIGHT = 32
 
-const SCREEN_WIDTH = 800
-const SCREEN_HEIGHT = 600
+const PLAYER_WIDTH = 24
+const PLAYER_HEIGHT = 24
+
+// const SCREEN_WIDTH = 800
+// const SCREEN_HEIGHT = 600
+
+// const SCREEN_WIDTH = 1600
+// const SCREEN_HEIGHT = 450
+
+// edit: canvas will fill screen dynamically
+let SCREEN_WIDTH = 800
+let SCREEN_HEIGHT = 600
+
+let WORLD_WIDTH = SCREEN_WIDTH
+let WORLD_HEIGHT = SCREEN_HEIGHT
+
+
+const SCALE = 2
+
 
 // Player :: struct {
 // 	x: i32,
@@ -392,6 +525,14 @@ interface Color {
 function Color(r: u8, g: u8, b: u8, a: u8) : Color {
 	return { r, g, b, a	}
 }
+
+// const BACKGROUND_COLOR = Color(32, 32, 32, 255); // gray
+// const BACKGROUND_COLOR = Color(16, 24, 32, 255); // bluish gray
+const BACKGROUND_COLOR = Color(8, 16, 24, 255); // deep blue
+// const BACKGROUND_COLOR = Color(12, 20, 28, 255); // weak compromise
+
+
+
 
 const COLOR_ZERO = Color(0,0,0,0);
 const COLOR_YELLOW = Color( 253, 249, 0, 255 );
@@ -946,7 +1087,9 @@ interface Player {
 // 	return { x, y, color, alive, life, exists }
 // }
 //
-const PLAYER_MOVE_SPEED = 4
+// const PLAYER_MOVE_SPEED = 4
+const PLAYER_MOVE_SPEED = 5
+
 const PLAYER_START_LIFE = 100
 
 let player : Player;
@@ -979,7 +1122,9 @@ const BULLET_START_LIFE = 300
 const BULLET_WIDTH = 8
 const BULLET_HEIGHT = 8
 const BULLET_OFFSET =  (PLAYER_WIDTH * 1.2)
-const BULLET_SPEED = 8
+// const BULLET_SPEED = 8
+const BULLET_SPEED = 12
+
 
 const BULLETS_PER_PLAYER = 6
 const MAX_BULLETS = MAX_PLAYERS * BULLETS_PER_PLAYER
@@ -1004,11 +1149,16 @@ const BULLET_PRECISION_FACTOR = 100 // lets us use int instead of float
 // TODO rename to init
 function _main() : void {
 
+	// SetFillStyle(BACKGROUND_COLOR)
+	ClearBackground(BACKGROUND_COLOR)
+	resizeCanvas()
 	initFont()
-
+	
 	// init_dummy_players()
 	reset_player()
 
+	canvas.style.display = 'block'
+	
 	connect_websocket()
 
 	// these are just hardcoded in html, unnecessary
@@ -1076,8 +1226,8 @@ function random_color() : Color {
 // How can we disambiguate this? "local player"?
 function reset_player() : void {
 	player = { 
-		x: SCREEN_WIDTH/2, 
-		y: SCREEN_HEIGHT/2, 
+		x: Math.floor(SCREEN_WIDTH/2), // I hate odd numbers
+		y: Math.floor(SCREEN_HEIGHT/2), 
 		color: Color(92, 128, 192, 255), // TODO plr color to top?
 		alive: true, 
 		life: PLAYER_START_LIFE,
@@ -1103,19 +1253,27 @@ function update_player() : void {
 		}
 	}
 
-	if(IsKeyDown("w") || IsKeyDown("ArrowUp") ) {
+	if(IsKeyDown("KeyW") || IsKeyDown("ArrowUp") ) {
 		console.log('up')
 		player.y -= PLAYER_MOVE_SPEED
 	}
-	if(IsKeyDown("s") || IsKeyDown("ArrowDown") ) {
+	if(IsKeyDown("KeyS") || IsKeyDown("ArrowDown") ) {
 		player.y += PLAYER_MOVE_SPEED
 	}
-	if(IsKeyDown("a") || IsKeyDown("ArrowLeft") ) {
+	if(IsKeyDown("KeyA") || IsKeyDown("ArrowLeft") ) {
 		player.x -= PLAYER_MOVE_SPEED
 	}
-	if(IsKeyDown("d") || IsKeyDown("ArrowRight") ) {
+	if(IsKeyDown("KeyD") || IsKeyDown("ArrowRight") ) {
 		player.x += PLAYER_MOVE_SPEED
 	}
+
+
+	if (player.x < 0) player.x = 0;
+	if (player.y < 0) player.y = 0;
+	if (player.x > WORLD_WIDTH  - PLAYER_WIDTH)  player.x = WORLD_WIDTH  - PLAYER_WIDTH;
+	if (player.y > WORLD_HEIGHT - PLAYER_HEIGHT) player.y = WORLD_HEIGHT - PLAYER_HEIGHT;
+	
+	
 
 	if(Mouse.down[MOUSE_LEFT] ) {
 		if(canShoot()) {
@@ -1168,6 +1326,25 @@ function update_players() : void {
 	// notably latency and cheating
 }
 
+function draw_terrain() : void {
+	// just random noise so you can see camera move
+	// TODO: if random is expensive (shouldn't be?) we can cache it
+	for(let i = 0; i < 200; i++) {
+		const c = 255;
+		const v = rand_range_const(32, 64) + rand_range(0, 16) 
+		// this was originally a bug (should have been constant), but the twinkling is beautiful
+		// ....happy little accidents
+		// it also kind of simulates old flickery arcade games
+		const color = Color(c,c,c,v);
+		const x = rand_range_const(0, WORLD_WIDTH)
+		const y = rand_range_const(0, WORLD_HEIGHT)
+		// const sz = rand_range_const(4,8)
+		const sz = rand_range_const(2,4)
+		
+		DrawRectangleArgs(x, y, sz, sz, color);
+	}
+}
+
 function draw_players() : void {
 	// for i in 0..<MAX_PLAYERS {
 	for (let i = 0; i < MAX_PLAYERS; i++) {
@@ -1184,8 +1361,7 @@ function draw_player(p: Player, id: i32) : void {
 	} else {
 		DrawRectangleArgs(p.x, p.y, PLAYER_WIDTH, PLAYER_HEIGHT, Color(255,0,0,128))
 	}
-	let textSize : i32 = 24
-	let textScale = calcTextScale(textSize);
+
 	// let text: string = `${id}`
 	let text : string;
 	if ( id == -1) {
@@ -1195,9 +1371,32 @@ function draw_player(p: Player, id: i32) : void {
 	}
 	
 	// DrawText(text, p.x, p.y - 32, textSize, Color(255,255,255,64))
-	// todo color
-	// todo size??? All we can do is integer scale everything...
-	renderText(p.x + 2, p.y - 32, text, 0.3, textScale);
+	// todo color?
+
+	// over
+	// renderText(p.x + 2, p.y + PLAYER_HEIGHT + 16, text, 0.3, textScale);
+	
+	// under
+	// renderText(p.x + 2, p.y + PLAYER_HEIGHT + 16, text, 0.3, textScale);
+	
+	// on player
+
+	if (text.length == 2) {
+		let textSize : i32 = 16
+		let textScale = calcTextScale(textSize);
+		// renderTextBlack(p.x + 3, p.y - PLAYER_HEIGHT + 5, text, 1, textScale);
+		// renderTextInvert(p.x + 2, p.y + 4, text, 1, textScale);
+		renderText(p.x + 2, p.y - PLAYER_HEIGHT + 4, text, 0.7, textScale);
+		
+	} else if (text.length == 3) {
+		let textSize : i32 = 16
+		let textScale = calcTextScale(textSize);
+		// renderTextBlack(p.x - CHAR_WIDTH/2*textScale + 3, p.y - PLAYER_HEIGHT + 1, text, 1, textScale);
+		// renderTextInvert(p.x + 2, p.y + 4, text, 1, textScale);
+		renderText(p.x - CHAR_WIDTH/2*textScale + 2, p.y - PLAYER_HEIGHT, text, 0.7, textScale);
+		
+	}
+
 }
 
 function update_bullets() : void {
@@ -1240,6 +1439,8 @@ function draw_bullet(b: Bullet) : void {
 let updateCounter: i32 = 0;
 
 function update(time: num) : void {
+	console.log(time)
+	reset_constant_rand();
 	updateCounter++;
 	// _time = GetTimeMs()
 	_frame_time = time - _time_prev;
@@ -1287,7 +1488,7 @@ function update(time: num) : void {
 	// rl.UpdateCamera(&camera, .ORBITAL)
 
 	// rl.ClearBackground(rl.RAYWHITE)
-	ClearBackground(Color(32, 32, 32, 255))
+	ClearBackground(BACKGROUND_COLOR)
 
 
 
@@ -1299,7 +1500,10 @@ function update(time: num) : void {
 	//     rl.DrawGrid(10, 1)
 	// }
 	// rl.EndMode3D()
-
+	
+	
+	
+	draw_terrain()
 
 
 	// draw player
@@ -1339,7 +1543,7 @@ function shoot() : void {
 
 	shootTimer = shootDelay
 
-	if (!bullets || bullets.length < (MAX_BULLETS)) return
+	if (!bullets || bullets.length < (MAX_BULLETS)) return // to silence tsc
 
 	
 	// find free bullet slot
@@ -1347,7 +1551,7 @@ function shoot() : void {
 	const endIndex = startIndex + BULLETS_PER_PLAYER - 1
 	// for i in startIndex..=endIndex {
 	for (let i = startIndex; i <= endIndex; i++) {
-		const bullet = bullets[i]!; // sigh
+		const bullet = bullets[i]!;
 		if(bullet.alive) { continue }
 		// if(we reach this line, we found a free slot
 		bullet.alive = true
@@ -1376,6 +1580,8 @@ function shoot() : void {
 		playSound(SFX.EXPLOSION_SHORT)
 		break
 	}
+	
+	// if we reach this line, no free bullet slot was found, and no bullet was fired
 }
 
 
@@ -1457,5 +1663,40 @@ function set_player_pos(plr_id: i32, x: i32, y: i32) : void {
 function set_player_id(plr_id: i32) : void {
 	player_idx = plr_id
 }
+
+///
+
+
+function resizeCanvas() {
+	// return
+	console.log('resize')
+	// const target_width = canvas.clientWidth;
+	// const target_height = canvas.clientHeight;
+
+	let target_width = window.innerWidth;
+	let target_height = window.innerHeight;
+	
+
+	SCREEN_WIDTH = Math.floor(target_width / SCALE);
+	SCREEN_HEIGHT = Math.floor(target_height / SCALE);
+
+	WORLD_WIDTH = SCREEN_WIDTH; // temporary
+	WORLD_HEIGHT = SCREEN_HEIGHT; 
+	
+	
+	// adjust target; force the render / display sizes to be an integer ratio
+	target_width = SCREEN_WIDTH * SCALE;
+	target_height = SCREEN_HEIGHT * SCALE;
+	
+
+	canvas.width = SCREEN_WIDTH
+	canvas.height = SCREEN_HEIGHT
+	canvas.style.width = `${target_width}px`;
+	canvas.style.height =` ${target_height}px`;
+	context.imageSmoothingEnabled = false; // not sure why i need to do this every time, but I do...
+}
+
+window.addEventListener("resize", resizeCanvas);
+
 
 window.onload = _main

@@ -20,6 +20,20 @@ WARNING: you must open port 80 in AWS
 */
 // const PORT = 80;
 
+
+type bool = boolean;
+type str = string;
+type num = number;
+type i32 = number;
+type f32 = number;
+type u8 = number;
+
+let DELAY = 0;
+DELAY = 1000; // simulate lag
+
+declare var Bun: any;
+// TODO: get TS definitions for Bun
+
 const PORT = 3000;
 const BASE_PATH = "../client/build";
 
@@ -52,7 +66,7 @@ function get_gzip_headers(file) {
 const MAX_PLAYERS = 256;
 
 // let users = {};
-let users = [];
+let users: bool[] = []; // why was this an array of "never" ?
 users.length = MAX_PLAYERS; // gotta love JS!
 
 let games = {};
@@ -252,7 +266,14 @@ const server = Bun.serve({
     message(ws, msg) {
       const user_id = ws.data.user_id;
       console.log(`msg from ${user_id}: ${msg}`);
-      ws.publish(ws.data.game, `MSG ${user_id} ${msg}`);
+
+      if (DELAY == 0) { // can I avoid duplication here?
+        ws.publish(ws.data.game, `MSG ${user_id} ${msg}`)
+      } else {
+        setTimeout(() =>
+          ws.publish(ws.data.game, `MSG ${user_id} ${msg}`),
+        DELAY);
+      }
     },
     error(ws){
       // TODO: does this mean it's broken / should be closed? 

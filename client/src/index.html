@@ -25,8 +25,36 @@
 	<!-- <link rel="shortcut icon" href="https://www.raylib.com/favicon.ico"> -->
 	
 	<style>
-		body { margin: 0px; }
-		canvas { border: 0px none; background-color: black; }
+		body { 
+			margin: 0px; 
+			overflow-x: hidden;
+			overflow:hidden;
+			/* background-color: #202020; */
+			background-color: #303030;
+			color: #f0f0f0;
+		}
+		canvas { 
+			border: none; 
+			outline: none;
+			/* background-color: black;  */
+			background-color: #303030;
+			image-rendering:pixelated;
+			/* width:1600px; */
+			/* height:900px; */
+			 
+			/* display: block; */
+			 /* prevents scrollbar .. what is the default? */
+
+			 display:none;
+			 /* prevent ugly resizing until done */
+
+		}
+		textarea, input {
+			display:none;
+			background-color: #303030;
+			color: #f0f0f0;
+			border: 1px solid #eee;
+		}
 	</style>
 	<script type='text/javascript' src="samjs.min.js"> </script>
 	<script type='text/javascript' src="riffwave.js"> </script>
@@ -34,15 +62,11 @@
 	</head>
 	<body>
 		<img id="number_font" style="display:none" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAAAwAQMAAAC8K2+0AAAABlBMVEVjZWz///8Lm1KvAAAAAXRSTlMAQObYZgAAADtJREFUKM9jYKAR+Gj7svre9wYQczKLphPTFDBzIhLT5n31IYiCiQqKXE4T0Jmf9z6sPvShgWEU0BEAAFiaFyC53IY4AAAAAElFTkSuQmCC" />
-		<canvas width=800 height=600 id=gameCanvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
-		<p id="output" />
+		<canvas id=gameCanvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
 		Chat: <input type="text" id="chat_input" style="width:75%">
 		<textarea disabled id="chat_log" style="font-family: sans-serif;height:300px; width: 80%;border:2px solid gray;"></textarea>
 
 		<script type="text/javascript" src="game.js"></script>
-		<script>
 
-
-		</script>
 	</body>
 </html>
